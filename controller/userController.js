@@ -1,112 +1,149 @@
-const dbConfig = require('../config/db.config');
-const { AdminDataModel } = require('../model/employee/adminModel');
-const { RegionalManagerDataModel } = require('../model/employee/regionalManagersModel');
-const userModel = require('../model/userModel')
+
+
+// const userModel = require('../model/userModel')
 const Crypto = require('crypto-js')
 
 const jwt = require("jsonwebtoken");
 const { SaveToken, CheckTokens } = require('../model/saveToken/saveToken');
 const DateHourss = require('../helpers/dateInhours');
-async function checkUserExistence(username, password) {
-    try {
-        const userExist = await userModel.checkUserCredentials(username, password)
-        return userExist
-    } catch (error) {
-        throw error;
-    }
-}
+const { CheckUserCredentials, createUserAccont } = require('../model/userModel');
+
+// async function CheckUserExistence(username, password) {
+//     try {
+//         console.log('INPUT DATA', {username, password})
+//         const userValid = await 
+//         return userValid
+//     } catch (error) {
+//         throw error;
+//     }
+// }
 
 async function login(req, res, next) {
     const { username, password } = req.body
-
-
-    // Validate CSRF token
-    // if (!csrfToken) {
-
-    //     return res.status(403).json({ message: "Missing CSRF token" });
-    // }
+    let SavedToken
+    const CryptoJS = Crypto
     try {
-        const CryptoJS = Crypto
-        const userExist = await checkUserExistence(username, password);
-        const user_id = userExist[0].user_id
 
-        if (userExist) {
+        const userExist = await CheckUserCredentials(username, password)
+        if (userExist[0] !== undefined) {
             res.setHeader('Content-Type', 'application/json');
 
-            const tokenId = req.cookies['auth']
-            console.log('HJK', tokenId)
-            if (tokenId === undefined) {
+            const authtoken = req.cookies['auth']
+            if (authtoken === undefined) {
                 const jwtToken = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-                console.log('TOKEN', jwtToken)
                 const expirationDate = new Date();
                 expirationDate.setHours(expirationDate.getHours() + 1);
-                res.cookie('auth', jwtToken, { expires: expirationDate, secure: true })
-                const userResponse = await checkUserRole(user_id)
-                console.log('USERROLE', userResponse)
-                const data = { username, jwtToken }
-                await SaveToken(data)
-                res.status(200).json({ Success: userResponse })
+                res.cookie('auth', jwtToken, { expires: expirationDate,  httpOnly: true })
+                const userResponse = userExist
+                const data = { username, jwtToken, expirationDate }
+                SavedToken = await SaveToken(data)
+                const dataToEncrypt = JSON.stringify({ user_data: userResponse });
+                const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
+                res.status(201).json({ Success: ciphertext })
+
             } else {
-                const checkTokenValidation = jwt.verify(tokenId, process.env.JWT_SECRET)
+                const checkTokenValidation = jwt.verify(authtoken, process.env.JWT_SECRET)
                 if (!checkTokenValidation) {
-                    res.status(401).json({error: "unauthorized requestadd "})
+                    res.status(401).json({ error: "unauthorized request" })
+                } else {
+                    const rowsData = await CheckTokens(authtoken)
+                    rowsData.forEach(async (data) => {
+                        const date = new Date()
+                        const expireTime = data.createAt
+                        if (date < expireTime) {
+                            // const userResponse = userExist
+                            const dataToEncrypt = JSON.stringify({ user_data: userExist });
+                            const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
+                            res.status(201).json({ Success: ciphertext })
+                        } else if (date >= expireTime) {
+                            res.clearCookie('auth')
+                            res.status(401).json({ message: 'Session Closed' })
+
+                        } else {
+                            res.clearCookie('auth')
+                            res.status(401).json({ Error: 'unauthorized access' })
+                        }
+                    })
                 }
-                // const checkTokenValidation = await 
             }
-
-
-
-            // console.log('TIME', { currentTime, tokenTime })
-            // if (tokenTime >= currentTime) {
-            //     const data = { jwtToken, username }
-            //     await SaveToken(data)
-            // }
-
-
+        } else {
+            res.status(500).json({ error: 'User not found' })
         }
 
     } catch (error) {
         console.log(error)
-        res.status(500).json({ message: "Internal server error" })
-    }
+        if (error.message === "invalid signature") {
+            res.status(401).json({ message: "unathorized access" })
+        } else {
 
-}
-async function checkUserRole(user_id) {
-    const adminResult = await AdminDataModel(user_id)
-    const rmanagerResult = await RegionalManagerDataModel(user_id)
-
-
-
-    if (adminResult.length > 0 && verifyToken) {
-        const dataToEncrypt = JSON.stringify({ user_role: 'admin', user_data: adminResult[0] });
-        const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
-        console.log('TOKEN', ciphertext)
-
-
-        if (tokenId !== undefined) {
-
+            res.status(500).json({ error: "Internal server error" })
         }
+    }
 
+}
+// async function checkUserRole(user_id) {
+//     const CryptoJS = Crypto
+//     const adminResult = await AdminDataModel(user_id)
+//     const rmanagerResult = await RegionalManagerDataModel(user_id)
+//     const 
+//     if (adminResult.length > 0) {
+//         const dataToEncrypt = JSON.stringify({ user_role: 'admin', user_data: adminResult[0] });
+//         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
+//         console.log('TOKEN', ciphertext)
+//         return ciphertext
+//     } else if (rmanagerResult.length > 0) {
+//         const dataToEncrypt = JSON.stringify({ user_role: 'rmanager', user_data: rmanagerResult[0] })
+//         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, csrfToken).toString()
+//         return ciphertext;
+//     } else {
+//         const dataToEncrypt = JSON.stringify({ user_role: 'salesrep', user_data:  })
+//         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, csrfToken).toString()
+//         return ciphertext;
+//         return
+//     }
+// }
 
-        return ciphertext
-        return;
-    } else if (rmanagerResult.length > 0) {
-        const dataToEncrypt = JSON.stringify({ user_role: 'rmanager', user_data: rmanagerResult[0] })
-        const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, csrfToken).toString()
+// async function tokeken(req, res) {
 
-        return ciphertext;
-    } else {
-        res.status(200).json({ message: "Login successful" })
-        return
+//     const csrfToken = req.sessionID;
+//     console.log(csrfToken)
+//     res.status(200).json({ csrfToken })
+
+// }
+
+async function createUser(req, res) {
+    const { username, password, role } = req.body
+    const cookieData = req.cookies['auth']
+    try {
+        const checkTokenValidation = jwt.verify(cookieData, process.env.JWT_SECRET)
+        if (!checkTokenValidation) {
+            res.status(401).json({ error: 'Unauthorized access' })
+        } else {
+            const rowsData = await CheckTokens(cookieData)
+            rowsData.forEach(async (data) => {
+                const date = new Date()
+                const expireTime = data.createAt
+
+                if (date < expireTime) {
+                    const response = await createUserAccont(username, password, role)
+                    if (response) {
+                        res.status(201).json({ Success: "User added Successfully" })
+                    } else {
+                        res.status(500).json({ Success: "Authorized user throw e" })
+                    }
+                } else if (date >= expireTime) {
+                    res.clearCookie('auth')
+                    res.status(401).json({ nessage: 'Session Closed' })
+                } else {
+                    res.clearCookie('auth')
+                    res.status(401).json({ error: 'Unauthorized access' })
+                }
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: error.message })
     }
 }
 
-async function token(req, res) {
-
-    const csrfToken = req.sessionID;
-    console.log(csrfToken)
-    res.status(200).json({ csrfToken })
-
-}
-
-module.exports = { login, token }
+module.exports = { login, createUser }

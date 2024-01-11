@@ -1,19 +1,22 @@
 const dbConfig = require('../config/db.config')
 
-async function checkUserCredentials(username, password) {
+async function CheckUserCredentials(username, password) {
+    console.log('Model Data',username, password)
     try {
-        const [rows, field] = await dbConfig.pool.execute('SELECT * FROM users WHERE username = ? AND password = ?', [username, password])
-        return rows.length > 0 ? rows : rows = null;
+        const [rows] = await dbConfig.pool.execute('SELECT * FROM spotshop.users WHERE username = ? AND password = ?', [username, password])
+        console.log(rows)
+        return rows.affectedRows !== 0 ? rows :  null;
     } catch (err) {
         console.log(err)
+        throw err
     }
 }
 
-async function createUserAccont(user_id, username, password) {
-    console.log(username, password)
+async function createUserAccont(username, password, role) {
+    console.log(username, password, role)
     try {
-        const sql = `INSERT INTO users(user_id, username, password) VALUES (?,?,?)`
-        const data = [user_id, username, password]
+        const sql = `INSERT INTO users(username, password, role) VALUES (?,?,?)`
+        const data = [username, password, role]
         const [insertData] = await dbConfig.pool.execute(sql, data)
         return insertData.affectedRows === 1 ? insertData : null
 
@@ -22,4 +25,4 @@ async function createUserAccont(user_id, username, password) {
         throw error
     }
 }
-module.exports = { checkUserCredentials, createUserAccont }
+module.exports = { CheckUserCredentials, createUserAccont }
