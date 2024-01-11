@@ -10,6 +10,7 @@ const { createProductController } = require('../controller/product/productContro
 const purchaseC = require('../controller/sales/createSalesController')
 const checkValid = require('../middleware/session')
 const UpdateProduct = require('../controller/product/updateProductController')
+const DeleteProduct = require('../controller/product/deleteProductController')
 
 
 const router = express.Router()
@@ -25,6 +26,7 @@ router.post('/rmanagercreate', RegionalManagerController)
 router.post('/branch', branchController)
 router.post('/product', checkValid, createProductController)
 router.put('/product/update', checkValid, UpdateProduct)
+router.delete('/product/delete', checkValid, DeleteProduct)
 router.post('/save/closingbook', checkValid, getTotalSales.StoreClosingBooks)
 
 module.exports = { router }
