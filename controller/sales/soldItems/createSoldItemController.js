@@ -1,9 +1,10 @@
-const CookieHelper = require('../../helpers/cookieHelper')
-const { createSalesModel } = require('../../model/sales/createSalesModel')
+const CookieHelper = require('../../../helpers/cookieHelper')
+const { createSalesModel } = require('../../../model/sales/createSalesModel')
 const jwt = require("jsonwebtoken");
-const { CheckTokens } = require("../../model/saveToken/saveToken");
-const { GetAllProduct, UpdateQuantity } = require('../../model/product/productModel');
-const GetSalesByDate = require('../../model/sales/SalesByDate');
+const { CheckTokens } = require("../../../model/saveToken/saveToken");
+const { GetAllProduct, UpdateQuantity } = require('../../../model/product/productModel');
+const GetSalesByDate = require('../../../model/sales/SalesByDate');
+const UUID = require('../../../helpers/uuid');
 
 async function purchaseController(req, res) {
     const salesData = req.body
@@ -16,6 +17,7 @@ async function purchaseController(req, res) {
             if (!checkTokenValidation) {
                 res.status(401).json({ error: 'Unauthorized access' })
             } else {
+                const product_uuid = UUID()
                 const rowsData = await CheckTokens(jwtToken)
                 rowsData.forEach(async (data) => {
                     const date = new Date()
@@ -27,12 +29,14 @@ async function purchaseController(req, res) {
                         const now = new Date()
                         const timestamp = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Lagos' }).format(now)
                         console.log('TT', now)
+                    
                         let results = []
                         const username = checkTokenValidation.username
                         for (const sales of salesData) {
                             const data = {
                                 ...sales,
-                                username
+                                username,
+                                product_uuid
                             }
                             console.log('DATAS', data)
                             const products = await createSalesModel(data)

@@ -2,11 +2,11 @@
 
 // const userModel = require('../model/userModel')
 const Crypto = require('crypto-js')
-
 const jwt = require("jsonwebtoken");
 const { SaveToken, CheckTokens } = require('../model/saveToken/saveToken');
 const DateHourss = require('../helpers/dateInhours');
 const { CheckUserCredentials, createUserAccont } = require('../model/userModel');
+
 
 // async function CheckUserExistence(username, password) {
 //     try {
@@ -21,6 +21,7 @@ const { CheckUserCredentials, createUserAccont } = require('../model/userModel')
 async function login(req, res, next) {
     const { username, password } = req.body
     let SavedToken
+    console.log('EEE', uuid)
     const CryptoJS = Crypto
     try {
 

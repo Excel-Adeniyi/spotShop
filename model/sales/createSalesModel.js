@@ -1,9 +1,9 @@
 const dbConfig = require('../../config/db.config')
+const UUID = require('../../helpers/uuid')
 
 async function createSalesModel(data) {
-
     try {
-        const sql = 'INSERT INTO daily_sales (product, quantity, price, totalAmount, username) VALUES (?,?,?,?, ?)'
+        const sql = 'INSERT INTO daily_sales (product, quantity, price, totalAmount, username, product_uuid) VALUES (?,?,?,?,?, ?)'
         const [rows, fields] = await dbConfig.pool.execute(sql, [...Object.values(data)])
 
         if (rows.affectedRows === 1) {

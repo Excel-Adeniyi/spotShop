@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const userRouter = require('./router/userRouter');
+const router = require('./router/router');
 const cookieParser = require("cookie-parser")
 const { mainSession } = require('./middleware/session');
 const session = require('express-session')
@@ -19,7 +19,7 @@ app.use(
     })
   );
   
-app.use('/', userRouter.router)
+app.use('/', router.router)
 
 app.listen(PORT, console.log(`app listening on port ${PORT}`))
 
