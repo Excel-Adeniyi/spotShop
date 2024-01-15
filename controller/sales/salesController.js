@@ -1,5 +1,5 @@
 const CookieHelper = require("../../helpers/cookieHelper");
-const { TotalSalesMade, SumofDaySales, StoreSum, StoreSumofDaySales, ListCloseBook, ClosingBook, StoreClosingBook } = require("../../model/sales/salesModel");
+const { TotalSalesMade, SumofDaySales, StoreSum, StoreSumofDaySales, ListCloseBook, ClosingBook, StoreClosingBook, GetStoredBooks, UpdateClosingBook } = require("../../model/sales/salesModel");
 const jwt = require("jsonwebtoken");
 const { CheckTokens } = require("../../model/saveToken/saveToken");
 
@@ -47,32 +47,44 @@ async function StoreClosingBooks(req, res) {
         const jwtToken = await CookieHelper(req)
 
         const rowsData = await CheckTokens(jwtToken)
-        console.log('JJJ', rowsData)
-        // const daily_sales = await 
         rowsData.forEach(async (data) => {
             const date = new Date()
             const expireTime = data.createAt
             const username = data.username
             if (date < expireTime) {
                 const dailySales = await ClosingBook();
-                console.log(dailySales.total_quantity)
+                // console.log(dailySales.total_quantity)
                 if (dailySales.length > 0) {
                     for (const record of dailySales) {
+                        let results = []
                         var total_quantity = record.total_quantity
                         var total_sales = record.total_sales
-                        // var username =  res.session.userId
-                        console.log("USER", username)
                         const data = {
-                            total_quantity, total_sales, username
+                            username, total_quantity, total_sales
                         }
-
-                        const outputTotal = await StoreClosingBook(data)
-                        if (outputTotal !== undefined) {
-                            res.status(201).json({ Success: "Sales Successfully Saved" })
+                        const checkBooks = await GetStoredBooks(username)
+                        // console.log('HHH',checkBooks)
+                        if (checkBooks !== null) {
+                            const updateBook = UpdateClosingBook(data)
+                            // console.log(updateBook)
+                            if (updateBook !== null) {
+                                results.push({ success: "Record Updated successfully" })
+                            } else {
+                                results.push({ error: "Error Updating Record" })
+                            }
                         } else {
-                            res.status(204).json({ error: "No Content" })
+                            const outputTotal = await StoreClosingBook(data)
+                            if (outputTotal !== undefined) {
+                                results.push({ Success: "Sales Successfully Saved" })
+                            } else {
+                                results.push({ error: "No Content" })
+                            }
                         }
-
+                        if (results.success !== undefined) {
+                            res.status(200).json({ results })
+                        } else {
+                            res.status(500).json({ results })
+                        }
                     }
                 }
 
@@ -84,9 +96,6 @@ async function StoreClosingBooks(req, res) {
                 res.status(401).json({ error: 'Unauthorized access' })
             }
         })
-
-
-
     } catch (error) {
         console.log(error)
         res.status(500).json({ error: "Internal Server Error" })

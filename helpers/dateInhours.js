@@ -1,6 +1,6 @@
 const DateHourss = (date) => {
     let dateTime = new Date()
-    console.log('DDD', dateTime)
+    // console.log('DDD', dateTime)
     let dateInhours = dateTime.getMinutes()
     return dateInhours
 }

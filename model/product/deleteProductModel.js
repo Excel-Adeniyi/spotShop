@@ -2,7 +2,7 @@ const dbConfig = require("../../config/db.config")
 
 
 async function DeleteProductModel(product_id){
-    const query = 'DELETE FROM spotshop.product WHERE product_id = ?'
+    const query = 'DELETE FROM product WHERE product_id = ?'
 
     try {
         const [result] = await dbConfig.pool.execute(query, [product_id])

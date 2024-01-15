@@ -5,7 +5,7 @@ const Crypto = require('crypto-js')
 const jwt = require("jsonwebtoken");
 const { SaveToken, CheckTokens } = require('../model/saveToken/saveToken');
 const DateHourss = require('../helpers/dateInhours');
-const { CheckUserCredentials, createUserAccont } = require('../model/userModel');
+const { CheckUserCredentials, createUserAccont, CheckUserCredentialsAdmin } = require('../model/userModel');
 
 
 // async function CheckUserExistence(username, password) {
@@ -21,7 +21,6 @@ const { CheckUserCredentials, createUserAccont } = require('../model/userModel')
 async function login(req, res, next) {
     const { username, password } = req.body
     let SavedToken
-    console.log('EEE', uuid)
     const CryptoJS = Crypto
     try {
 
@@ -31,10 +30,10 @@ async function login(req, res, next) {
 
             const authtoken = req.cookies['auth']
             if (authtoken === undefined) {
-                const jwtToken = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const jwtToken = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '5h' });
                 const expirationDate = new Date();
-                expirationDate.setHours(expirationDate.getHours() + 1);
-                res.cookie('auth', jwtToken, { expires: expirationDate,  httpOnly: true })
+                expirationDate.setHours(expirationDate.getHours() + 5);
+                res.cookie('auth', jwtToken, { expires: expirationDate, httpOnly: true })
                 const userResponse = userExist
                 const data = { username, jwtToken, expirationDate }
                 SavedToken = await SaveToken(data)
@@ -43,19 +42,43 @@ async function login(req, res, next) {
                 res.status(201).json({ Success: ciphertext })
 
             } else {
+
                 const checkTokenValidation = jwt.verify(authtoken, process.env.JWT_SECRET)
                 if (!checkTokenValidation) {
                     res.status(401).json({ error: "unauthorized request" })
                 } else {
                     const rowsData = await CheckTokens(authtoken)
+                    // console.log(rowsData)
                     rowsData.forEach(async (data) => {
                         const date = new Date()
                         const expireTime = data.createAt
+                        const tokenchecker = data.token
+
                         if (date < expireTime) {
                             // const userResponse = userExist
-                            const dataToEncrypt = JSON.stringify({ user_data: userExist });
-                            const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
-                            res.status(201).json({ Success: ciphertext })
+                            if (username === data.username) {
+                                if (tokenchecker === authtoken) {
+                                    res.status(401).json({ error: "User already logged in using this credential" })
+                                } else {
+                                    const dataToEncrypt = JSON.stringify({ user_data: userExist });
+                                    const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
+                                    res.status(201).json({ Success: ciphertext })
+                                }
+                            } else {
+                                res.clearCookie('auth')
+                                const jwtToken = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '5h' });
+                                const expirationDate = new Date();
+                                expirationDate.setHours(expirationDate.getHours() + 5);
+                                res.cookie('auth', jwtToken, { expires: expirationDate, httpOnly: true })
+                                const userResponse = userExist
+                                const data = { username, jwtToken, expirationDate }
+                                SavedToken = await SaveToken(data)
+                                const dataToEncrypt = JSON.stringify({ user_data: userResponse });
+                                const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
+                                res.status(201).json({ Success: ciphertext })
+                            }
+
+
                         } else if (date >= expireTime) {
                             res.clearCookie('auth')
                             res.status(401).json({ message: 'Session Closed' })
@@ -64,8 +87,10 @@ async function login(req, res, next) {
                             res.clearCookie('auth')
                             res.status(401).json({ Error: 'unauthorized access' })
                         }
+
                     })
                 }
+
             }
         } else {
             res.status(500).json({ error: 'User not found' })
@@ -82,35 +107,6 @@ async function login(req, res, next) {
     }
 
 }
-// async function checkUserRole(user_id) {
-//     const CryptoJS = Crypto
-//     const adminResult = await AdminDataModel(user_id)
-//     const rmanagerResult = await RegionalManagerDataModel(user_id)
-//     const 
-//     if (adminResult.length > 0) {
-//         const dataToEncrypt = JSON.stringify({ user_role: 'admin', user_data: adminResult[0] });
-//         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, '17hdka0kdh38hdj3').toString();
-//         console.log('TOKEN', ciphertext)
-//         return ciphertext
-//     } else if (rmanagerResult.length > 0) {
-//         const dataToEncrypt = JSON.stringify({ user_role: 'rmanager', user_data: rmanagerResult[0] })
-//         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, csrfToken).toString()
-//         return ciphertext;
-//     } else {
-//         const dataToEncrypt = JSON.stringify({ user_role: 'salesrep', user_data:  })
-//         const ciphertext = CryptoJS.AES.encrypt(dataToEncrypt, csrfToken).toString()
-//         return ciphertext;
-//         return
-//     }
-// }
-
-// async function tokeken(req, res) {
-
-//     const csrfToken = req.sessionID;
-//     console.log(csrfToken)
-//     res.status(200).json({ csrfToken })
-
-// }
 
 async function createUser(req, res) {
     const { username, password, role } = req.body
@@ -126,12 +122,18 @@ async function createUser(req, res) {
                 const expireTime = data.createAt
 
                 if (date < expireTime) {
-                    const response = await createUserAccont(username, password, role)
-                    if (response) {
-                        res.status(201).json({ Success: "User added Successfully" })
+                    const check = await CheckUserCredentialsAdmin(username, password, role)
+                    if (check.length > 0 && check !== undefined) {
+                        res.status(500).json({ error: "User already exist" })
                     } else {
-                        res.status(500).json({ Success: "Authorized user throw e" })
+                        const response = await createUserAccont(username, password, role)
+                        if (response) {
+                            res.status(201).json({ Success: "User added Successfully" })
+                        } else {
+                            res.status(500).json({ error: "Unauthorized user throw e" })
+                        }
                     }
+
                 } else if (date >= expireTime) {
                     res.clearCookie('auth')
                     res.status(401).json({ nessage: 'Session Closed' })

@@ -8,7 +8,7 @@ async function SaveToken(data) {
     // console.log(date)
     try {
         const [rows] = await dbConfig.pool.execute(sqlQuery, [jwtToken, username, expirationDate ])
-        console.log('Affected', rows  )
+        // console.log('Affected', rows  )
         return rows.affectedRows > 0 ? rows : row === null
     } catch (error) {
         console.log(error)
@@ -17,7 +17,7 @@ async function SaveToken(data) {
 }
 
 async function CheckTokens(authtoken) {
-    const sqlQuery = "SELECT * FROM spotshop.token where token=?"
+    const sqlQuery = "SELECT * FROM token where token=?"
     const token = authtoken
     try {
         const [rows] = await dbConfig.pool.query(sqlQuery, token)

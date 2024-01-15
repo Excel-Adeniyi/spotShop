@@ -4,7 +4,7 @@ const { memoryStore } = require('./session');
 async function something(req, res) {
     console.log('Session ID:', req.sessionID);
     const sessionId = req.sessionID;
-    console.log(sessionId)
+    // console.log(sessionId)
     memoryStore.get(sessionId, (error, storedSession) => {
         if (error) {
             console.error(error);

@@ -2,16 +2,17 @@ const dbConfig = require('../../config/db.config')
 const UUID = require('../../helpers/uuid')
 
 async function createSalesModel(data) {
+    const product_uuid = UUID()
     try {
         const sql = 'INSERT INTO daily_sales (product, quantity, price, totalAmount, username, product_uuid) VALUES (?,?,?,?,?, ?)'
-        const [rows, fields] = await dbConfig.pool.execute(sql, [...Object.values(data)])
+        const [rows, fields] = await dbConfig.pool.execute(sql, [...Object.values(data), product_uuid])
 
         if (rows.affectedRows === 1) {
-            console.log('Product created Successfully')
+            // console.log('Product created Successfully')
             console.log(rows)
             return { success: true, rows: rows.insertId }
         } else {
-            console.log('Failed to create a sales record.');
+            // console.log('Failed to create a sales record.');
             return { error: false, rows: rows.insertId }// You can return false or any relevant error indicator.
         }
 
@@ -19,18 +20,18 @@ async function createSalesModel(data) {
     catch (error) {
         if (error.errno === 1062 && error.code === 'ER_DUP_ENTRY') {
 
-            console.log('Duplicate entry', error)
+            // console.log('Duplicate entry', error)
             throw new Error('Duplicate entry for Product ID')
 
         } else {
-            console.log('Internal Server error', error)
+            // console.log('Internal Server error', error)
             throw error;
         }
     }
 }
 
 async function ListDailySales() {
-    const query = 'SELECT * FROM spotshop.daily_sales WHERE DATE(timeday)= CURDATE() '
+    const query = 'SELECT * FROM daily_sales WHERE DATE(timeday)= CURDATE() '
     try {
         const [result] = await dbConfig.pool.execute(query)
         return result.length > 0 ? result : null
@@ -41,7 +42,7 @@ async function ListDailySales() {
 
 
 async function ListSaleByDate(date1, date2) {
-    const query = 'SELECT * FROM spotshop.daily_sales WHERE timeday BETWEEN ? AND ?'
+    const query = 'SELECT * FROM daily_sales WHERE timeday BETWEEN ? AND ?'
     const date = [date1, date2]
     try {
         const [result] = await dbConfig.pool.execute(query, date)

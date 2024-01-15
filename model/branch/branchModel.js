@@ -6,7 +6,7 @@ async function createBranchModel(branchData) {
 
 
     try {
-        const checkBranchExist = `SELECT COUNT(*) AS count FROM spotshop.branch WHERE branch_name = ? `
+        const checkBranchExist = `SELECT COUNT(*) AS count FROM branch WHERE branch_name = ? `
         console.log('EEEE', branch_name)
 
         const [checkExistResult] = await dbConfig.pool.execute(checkBranchExist, [`${branch_name}`])

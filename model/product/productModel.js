@@ -2,7 +2,7 @@ const dbConfig = require('../../config/db.config')
 const { randNum } = require('../../helpers/randomNumbers')
 
 async function GetAllProduct(product_name) {
-    const sql = 'SELECT * FROM spotshop.product WHERE product_name = ?'
+    const sql = 'SELECT * FROM product WHERE product_name = ?'
     try {
         const [getProducts] = await dbConfig.pool.execute(sql, [product_name])
         if (getProducts.length > 0) {
@@ -16,16 +16,16 @@ async function GetAllProduct(product_name) {
 
 }
 async function UpdateQuantity(currentQuantity, prodName) {
-    const sql = 'UPDATE spotshop.product SET product_quantity_left = ? WHERE product_name = ?'
+    const sql = 'UPDATE product SET product_quantity_left = ? WHERE product_name = ?'
 
     try {
         const [updatePQ] = await dbConfig.pool.execute(sql, [currentQuantity, prodName])
         // Check if the update was successful
         if (updatePQ.affectedRows > 0) {
-            console.log(`Quantity updated successfully for ${prodName}`);
+            // console.log(`Quantity updated successfully for ${prodName}`);
             return true; // Return a success indicator if needed
         } else {
-            console.log(`No rows were updated for ${prodName}`);
+            // console.log(`No rows were updated for ${prodName}`);
             return false; // Return a failure indicator if needed
         }
     } catch (error) {
@@ -39,7 +39,7 @@ async function CreateProductModel(productData) {
         product_quantity_left } = productData
     const product_id = randNum
     try {
-        const checkData = `SELECT COUNT(*) AS count FROM spotshop.product WHERE product_name = ?`
+        const checkData = `SELECT COUNT(*) AS count FROM product WHERE product_name = ?`
 
         const [checkProductExist] = await dbConfig.pool.execute(checkData, [product_name])
         if (checkProductExist[0].count > 0) {
