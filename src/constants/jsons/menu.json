@@ -1,0 +1,31 @@
+[
+    {
+        "menu": "Dashboard"
+    },
+    {
+        "menu": "Sales",
+        "sub_menu": [
+            "Sales Order",
+            "Transaction Record",
+            "Daily Sales Report"
+        ]
+    },
+    {
+        "menu": "Inventory",
+        "sub_menu": [
+            "Inventory List",
+            "Add Inventory",
+            "Update Inventory",
+            "Delete Inventory"
+        ]
+    },
+    {
+        "menu": "User manager"
+    },
+    {
+        "menu": "Setting"
+    },
+    {
+        "menu": "Log out"
+    }
+]

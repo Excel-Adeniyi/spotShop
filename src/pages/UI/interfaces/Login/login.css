@@ -1,0 +1,57 @@
+.web-banner {
+    background-image: url('../../../../../public/assert/banner.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    width: 100%;
+}
+
+.img-align{
+    justify-content: center;
+    display: flex;
+    /* width: 70%; */
+}
+
+.logo-img {
+    height: 150px;
+    border-radius: 100px;
+}
+
+.form-control {
+    border-color: rgba(0, 128, 0, 0.548) !important
+}
+
+.form-control:focus {
+    border-color: rgb(4, 248, 4) !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 253, 153, 0.25) !important;
+}
+
+.login-form {
+    justify-content: center;
+    position: relative;
+    
+}
+
+.login-form-content {
+    position: absolute;
+    top: 25%;
+    right: 0%;
+    left: 20%;
+    width: 60%;
+    margin-left: 0 auto;
+    margin-right: 0 auto;
+   
+}
+
+.headers{
+    /* font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
+    font-weight: bolder;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    font-size: 50px;
+}
+
+.align-btn{
+    width: 75%;
+}

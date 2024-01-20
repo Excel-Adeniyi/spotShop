@@ -1,0 +1,25 @@
+.sidebar-color {
+    background-color: #032014;
+    color: white;
+    display: block;
+    /* justify-content: center; */
+    /* height: 100vh; */
+    width: inherit;
+    position: fixed;
+    height: 100vh;
+    align-content: center;
+}
+
+.sub-menu {
+    background-color: #010c07;
+    color: rgba(255, 255, 255, 0.705);
+}
+
+.sub-menu .border-bottom{
+    /* border-bottom: rgb(245, 241, 241) !important; */
+    cursor: pointer;
+}
+
+.sub-menu:hover{
+    background-color: rgb(128, 128, 127);
+}
