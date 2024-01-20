@@ -37,6 +37,7 @@ import { fetchData, Sales } from "./makeData.tsx";
 import { stringify } from "flatted";
 import { DebouncedInput } from "../../../../../helper/tableFilter/debounced.tsx";
 import { Filter } from "../../../../../helper/tableFilter/tableFilter.tsx";
+import { string } from "yargs";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -297,7 +298,22 @@ export default function DailySalesTable() {
                       </td>
                     );
                   }
-
+                  if (
+                    React.isValidElement(cellData) &&
+                    cellData.props.column.id === "timeday"
+                  ) {
+                    
+                    return (
+                      <td key={cell.id}>
+                        {/* Render the action button */}
+                        <div className="row row-col-3">
+                          <div className="col">
+                            {cellData}
+                          </div>
+                        </div>
+                      </td>
+                    );
+                  }
                   // if (
                   //   React.isValidElement(cellData) &&
                   //   cellData.props.column.id === "timeday"

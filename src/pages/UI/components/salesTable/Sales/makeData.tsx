@@ -38,14 +38,11 @@ export async function fetchData(date1: any, date2: any): Promise<Sales[]> {
     const data: any = response.data.results;
     // console.log("LOOGGING", data);
     // Map the fetched data to the structure of your Person type
-    const formattedData: Sales[] = data.map((items: any) => (
-      const time = item.timeday;
-      {
-  
+    const formattedData: Sales[] = data.map((items: any) => ({
       id: items.id,
       product: items.product,
       quantity: items.quantity,
-      timeday:  new Date(items.timeday),
+      timeday: new Date(items.timeday),
       totalAmount: items.totalAmount,
       action: items.product_uuid,
     }));
