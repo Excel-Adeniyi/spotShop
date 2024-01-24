@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Collapse } from "react-bootstrap";
 import { MdArrowDropDownCircle } from "react-icons/md";
 import "../Layout/sidebar/sidebar.css";
+import { Link } from "react-router-dom";
 
 interface CollapseProps {
   menu: string;
@@ -12,7 +13,7 @@ export default function Collapser({ menu, sub_menu }: CollapseProps) {
   const toggle = () => {
     setOpen(!open);
   };
-  
+
   return (
     <div>
       <div className=" border-bottom  mt-2">
@@ -33,9 +34,30 @@ export default function Collapser({ menu, sub_menu }: CollapseProps) {
         sub_menu.map((item: any) => {
           // console.log(item);
           return (
-            <Collapse in={open} key={item} className="sub-menu">
-              <div id="example-collapse-text " className="container  pt-2 ps-3 pe-3 pb-2">{item}</div>
-            </Collapse>
+            <>
+              {item === "Sales Order" ? (
+                <Link to="/createSales">
+                  {" "}
+                  <Collapse in={open} key={item} className="sub-menu">
+                    <div
+                      id="example-collapse-text "
+                      className="container  pt-2 ps-3 pe-3 pb-2"
+                    >
+                      {item}
+                    </div>
+                  </Collapse>{" "}
+                </Link>
+              ) : (
+                <Collapse in={open} key={item} className="sub-menu">
+                  <div
+                    id="example-collapse-text "
+                    className="container  pt-2 ps-3 pe-3 pb-2"
+                  >
+                    {item}
+                  </div>
+                </Collapse>
+              )}
+            </>
           );
         })}
     </div>

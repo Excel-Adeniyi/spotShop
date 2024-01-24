@@ -8,6 +8,7 @@ import "./index.css";
 import { Provider } from "react-redux";
 import store from "./store/store.tsx";
 import Dashboard from "./pages/UI/interfaces/dashboard/dashboard.tsx";
+import CreateSales from "./pages/UI/interfaces/sales/createSales.tsx";
 // import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -21,6 +22,7 @@ root.render(
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/createSales" element={<CreateSales />} />
         </CustomRoutes>
       </BrowserRouter>
     </Provider>

@@ -1,12 +1,5 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { ReactNode, useEffect, useState } from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Breadcrumb } from "react-bootstrap";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { FaHome } from "react-icons/fa";
-import Pagination from "../../../../../components/paginantion/pagination.tsx";
-import _ from "lodash";
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
   // eslint-disable-next-line import/named
 
@@ -33,11 +26,17 @@ import {
 } from "@tanstack/react-table";
 
 import { rankItem, compareItems } from "@tanstack/match-sorter-utils";
-import { fetchData, Sales } from "./makeData.tsx";
+import React, { useEffect, useState } from "react";
 import { stringify } from "flatted";
-import { DebouncedInput } from "../../../../../helper/tableFilter/debounced.tsx";
-import { Filter } from "../../../../../helper/tableFilter/tableFilter.tsx";
-import { string } from "yargs";
+// import { fetchData, Sales } from "./makeData.tsx";
+
+import _ from "lodash";
+import { DebouncedInput } from "../../../../helper/tableFilter/debounced.tsx";
+import { Filter } from "../../../../helper/tableFilter/tableFilter.tsx";
+import { Sales } from "../../components/salesTable/Sales/makeData.tsx";
+
+import { fetchData } from "../../components/salesTable/Sales/makeData.tsx";
+import { useLocation } from "react-router";
 
 declare module "@tanstack/table-core" {
   interface FilterFns {
@@ -76,8 +75,14 @@ const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
   return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
 };
 
-export default function DailySalesTable() {
+export default function CreateSales() {
   // const rerender = React.useReducer(() => ({}), {})[1];
+
+  const location = useLocation()
+
+  const currentPath = location.pathname
+
+  console.log("CURRENTPATH:", currentPath)
   const [dates, setDates] = useState({
     date1: "",
     date2: "",
@@ -126,7 +131,7 @@ export default function DailySalesTable() {
       const date2 = dates.date2;
       const date1 = dates.date1;
       // console.log("DDD", date2, date1);
-      const result = await fetchData(date1, date2);
+      const result = await fetchData(date1, date2, currentPath);
       // console.log("DDDDD", result);
       setData(result);
     } catch (error) {
@@ -179,7 +184,6 @@ export default function DailySalesTable() {
       }
     }
   }, [tables.getState().columnFilters[0]?.id]);
-
   return (
     <div className="p-2">
       <div className="row row-cols-2 d-flex justify-content-between">
@@ -322,50 +326,41 @@ export default function DailySalesTable() {
                     React.isValidElement(cellData) &&
                     cellData.props.column.id === "timeday"
                   ) {
-                    console.log("CELL", new Date(cellData.props.row.original.timeday))
+                    console.log(
+                      "CELL",
+                      new Date(cellData.props.row.original.timeday)
+                    );
                     let datecon;
 
                     if (Array.isArray(cellData.props.row.original.timeday)) {
-                      datecon = cellData.props.row.original.timeday.map((item: Date, index: any) => (
-                        <React.Fragment key={index}>{new Date(item).toLocaleDateString()}</React.Fragment>
-                      ));
+                      datecon = cellData.props.row.original.timeday.map(
+                        (item: Date, index: any) => (
+                          <React.Fragment key={index}>
+                            {new Date(item).toLocaleDateString()}
+                          </React.Fragment>
+                        )
+                      );
                     } else {
-                      datecon = <React.Fragment key={0}>{new Date(cellData.props.row.original.timeday).toLocaleString()}</React.Fragment>;
+                      datecon = (
+                        <React.Fragment key={0}>
+                          {new Date(
+                            cellData.props.row.original.timeday
+                          ).toLocaleString()}
+                        </React.Fragment>
+                      );
                     }
-                    
-                    
+
                     return (
                       <td key={cell.id}>
                         {/* Render the action button */}
                         <div className="row row-col-3">
-                          <div className="col">
-                            {datecon}
-                          </div>
+                          <div className="col">{datecon}</div>
                         </div>
                       </td>
                     );
                   }
-                  // if (
-                  //   React.isValidElement(cellData) &&
-                  //   cellData.props.column.id === "timeday"
-                  // ) {
-                  //   return (
-                  //     <td key={cell.id}>
-                  //       {/* Render the action button */}
-                  //       <div className="row row-col-3">
-                  //         <div className="col">
-                  //           {" "}
-                  //           {new Date(cellData).toL
-                  //         </div>
-                  //       </div>
-                  //     </td>
-                  //   );
-                  // }
 
-                  // Render other data if not a button
                   return <td key={cell.id}>{cellData}</td>;
-
-                  // return <td key={cell.id}>{cellData}</td>;
                 })}
               </tr>
             );
@@ -473,4 +468,3 @@ export default function DailySalesTable() {
     </div>
   );
 }
-// A debounced input react component

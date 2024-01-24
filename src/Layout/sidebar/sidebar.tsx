@@ -2,9 +2,8 @@
 import React from "react";
 import "./sidebar.css";
 import Collapser from "../../components/Collapse.tsx";
-import Menu from "../../constants/jsons/menu.json"
+import Menu from "../../constants/jsons/menu.json";
 export default function Sidebar() {
-
   return (
     <React.Fragment>
       <div className="sidebar-color">
